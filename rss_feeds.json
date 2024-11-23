@@ -1,0 +1,9 @@
+{
+  "feeds": [
+    {
+      "id": "coolshell",
+      "title": "酷壳 - CoolShell",
+      "url": "https://coolshell.cn/feed"
+    }
+  ]
+} 

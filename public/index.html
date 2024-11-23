@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS阅读器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .feed-list {
+            margin-bottom: 20px;
+        }
+        .feed-item {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .feed-item:hover {
+            background-color: #e0e0e0;
+        }
+        .article {
+            border-bottom: 1px solid #ccc;
+            padding: 15px 0;
+        }
+        .article h2 {
+            margin: 0 0 10px 0;
+        }
+        .article-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .article-detail {
+            padding: 20px;
+            background: #fff;
+            margin-top: 20px;
+        }
+        .back-button {
+            margin-bottom: 20px;
+            padding: 5px 10px;
+            cursor: pointer;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RSS阅读器</h1>
+    <div class="feed-list" id="feedList"></div>
+    <div id="articles"></div>
+    <div id="articleDetail" class="article-detail" style="display: none;"></div>
+
+    <script>
+        async function loadFeeds() {
+            const response = await fetch('/api/feeds');
+            const data = await response.json();
+            const feedList = document.getElementById('feedList');
+            
+            data.feeds.forEach(feed => {
+                const div = document.createElement('div');
+                div.className = 'feed-item';
+                div.textContent = feed.title;
+                div.onclick = () => loadFeedContent(feed.id);
+                feedList.appendChild(div);
+            });
+        }
+
+        async function loadFeedContent(feedId) {
+            const response = await fetch(`/api/feed/${feedId}`);
+            const feed = await response.json();
+            const articlesDiv = document.getElementById('articles');
+            
+            articlesDiv.innerHTML = `<h2>${feed.title}</h2>`;
+            
+            feed.items.forEach(item => {
+                const article = document.createElement('div');
+                article.className = 'article';
+                article.innerHTML = `
+                    <h2><a href="#" onclick="showArticle(event, ${JSON.stringify(item)})">${item.title}</a></h2>
+                    <div class="article-meta">
+                        发布时间: ${new Date(item.pubDate).toLocaleString()}
+                    </div>
+                    <div class="article-content">
+                        ${item.contentSnippet || ''}
+                    </div>
+                `;
+                articlesDiv.appendChild(article);
+            });
+        }
+
+        function showArticle(event, article) {
+            event.preventDefault();
+            
+            const articlesDiv = document.getElementById('articles');
+            const articleDetail = document.getElementById('articleDetail');
+            
+            articlesDiv.style.display = 'none';
+            articleDetail.style.display = 'block';
+            
+            articleDetail.innerHTML = `
+                <button class="back-button" onclick="backToList()">返回列表</button>
+                <h2>${article.title}</h2>
+                <div class="article-meta">
+                    发布时间: ${new Date(article.pubDate).toLocaleString()}
+                </div>
+                <div class="article-content">
+                    ${article.content || article.contentSnippet || ''}
+                </div>
+            `;
+        }
+
+        function backToList() {
+            const articlesDiv = document.getElementById('articles');
+            const articleDetail = document.getElementById('articleDetail');
+            
+            articlesDiv.style.display = 'block';
+            articleDetail.style.display = 'none';
+        }
+
+        // 页面加载时获取RSS源列表
+        loadFeeds();
+    </script>
+</body>
+</html> 
