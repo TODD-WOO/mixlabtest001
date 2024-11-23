@@ -4,6 +4,11 @@
       "id": "coolshell",
       "title": "酷壳 - CoolShell",
       "url": "https://coolshell.cn/feed"
+    },
+    {
+      "id": "sspai",
+      "title": "少数派 - SSPAI",
+      "url": "https://sspai.com/feed"
     }
   ]
 } 
